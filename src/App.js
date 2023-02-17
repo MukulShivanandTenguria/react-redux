@@ -1,25 +1,50 @@
-import logo from './logo.svg';
-import './App.css';
+import { connect } from "react-redux";
+import React, { useEffect } from "react";
+import { incNumber, decNumber } from "./redux/actions";
+import { useSelector, useDispatch } from "react-redux";
+import { buyCake } from "./redux1";
+import HookCakeComponent from "./components/HookCakeComponent";
+import { fetchUsers } from "./redux1";
+const App = (props) => {
+  const number = useSelector((value) => value.changeNumber);
+  const user = useSelector((value) => value.user);
+  const dispatch = useDispatch();
 
-function App() {
+  useEffect(() => {
+    dispatch(fetchUsers());
+  }, []);
+
+  console.log(user.users);
+
   return (
-    <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
-    </div>
+    <>
+      <button onClick={() => dispatch(decNumber())}>-</button>
+      <input value={number} />
+      <button onClick={() => dispatch(incNumber())}>+</button>
+      <div>
+        <h2>number of cakes-{props.numofCakes}</h2>
+        <button onClick={props.buyCake}>Buy Cake</button>
+      </div>
+      <HookCakeComponent />
+      {user.loading?(<h1>LOADING</h1>):user.error?(<p>{user.error}</p>):(
+        user&&user.users&&user.users.map((value,index)=>{
+          return( <p key={index}>{value.name}</p>)
+        })
+      )}
+    </>
   );
-}
+};
 
-export default App;
+const mapStateToProps = (state) => {
+  return {
+    numofCakes: state.numofCakes,
+  };
+};
+
+const mapDispatchToProps = (dispatch) => {
+  return {
+    buyCake: () => dispatch(buyCake()),
+  };
+};
+
+export default connect(mapStateToProps, mapDispatchToProps)(App);
